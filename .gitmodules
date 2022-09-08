@@ -1,0 +1,15 @@
+[submodule "bin/matchmesh"]
+	path = bin/matchmesh
+	url = https://github.com/r03ert0/matchmesh
+[submodule "bin/meshparam"]
+	path = bin/meshparam
+	url = https://github.com/r03ert0/meshparam
+[submodule "bin/GraphiteThree"]
+	path = bin/GraphiteThree
+	url = https://github.com/BrunoLevy/GraphiteThree
+[submodule "bin/homogeneous"]
+	path = bin/homogeneous
+	url = https://github.com/r03ert0/homogeneous
+[submodule "bin/meshgeometry"]
+	path = bin/meshgeometry
+	url = https://github.com/neuroanatomy/meshgeometry
