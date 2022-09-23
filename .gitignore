@@ -1,3 +1,5 @@
 bin
+test_data
+log.txt
 .DS_Store
 ._.DS_Store
