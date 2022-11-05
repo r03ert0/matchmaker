@@ -117,27 +117,32 @@ def energy(sph):
 
     return E
 
-# remove olfactory bulbs from mov
-Vmov0, Fmov0 = igl.read_triangle_mesh("test_data/F21_P16_seg.ply")
-Vmov, Fmov = remove_olfactory_bulbs(Vmov0, Fmov0)
-igl.write_triangle_mesh("test_data/no-ob.ply", Vmov, Fmov, force_ascii=False)
+def do_remove_olfactory_bulbs(in_mesh, out_mesh):
+    # remove olfactory bulbs from mov
+    Vmov0, Fmov0 = igl.read_triangle_mesh(in_mesh)
+    _Vmov, _Fmov = remove_olfactory_bulbs(Vmov0, Fmov0)
 
-# remesh mov without olfactory bulbs
-out = sp.run([
-    "bin/GraphiteThree/build/Darwin-clang-dynamic-Release/bin/vorpalite",
-    "profile=scan",
-    "sys:ascii=true",
-    f"pts={len(Vmov)}",
-    "test_data/no-ob.ply",
-    "test_data/no-ob.remeshed.ply"
-], capture_output=True)
-print(out)
+    tmp_mesh = in_mesh.replace("ply", "no-ob.ply")
+    igl.write_triangle_mesh(tmp_mesh, _Vmov, _Fmov, force_ascii=False)
 
-process_mesh("test_data/no-ob.remeshed.ply")
-Vmov, Fmov = igl.read_triangle_mesh("test_data/no-ob.remeshed.ply")
+    # remesh mov without olfactory bulbs
+    out = sp.run([
+        "bin/GraphiteThree/build/Darwin-clang-dynamic-Release/bin/vorpalite",
+        "profile=scan",
+        "sys:ascii=true",
+        f"pts={len(_Vmov)}",
+        tmp_mesh,
+        out_mesh
+    ], capture_output=True)
+    print(out)
 
-process_mesh("test_data/F115_P16_Nissl_x20_mesh.ply")
-Vref, Fref = igl.read_triangle_mesh("test_data/F115_P16_Nissl_x20_mesh.ply")
+_, mesh1, mesh2, mesh3 = sys.argv
+
+process_mesh(mesh1)
+Vmov, Fmov = igl.read_triangle_mesh(mesh1)
+
+process_mesh(mesh2)
+Vref, Fref = igl.read_triangle_mesh(mesh2)
 
 # scale mov to match ref
 vol_r = trimesh.Trimesh(vertices=Vref, faces=Fref).volume
@@ -179,11 +184,15 @@ for rot in rotations:
 Vmov = Vmov@min_rot
 print("mov rotation:", min_rot)
 
-igl.write_triangle_mesh("test_data/scaled_centered_ref.ply", Vref, Fref, force_ascii=False)
-igl.write_triangle_mesh("test_data/scaled_centered_mov.ply", Vmov, Fmov, force_ascii=False)
+mesh1_1 = mesh1.replace("ply", "_scaled_centered_mov.ply")
+mesh2_1 = mesh1.replace("ply", "_scaled_centered_ref.ply")
+igl.write_triangle_mesh(mesh2_1, Vref, Fref, force_ascii=False)
+igl.write_triangle_mesh(mesh1_1, Vmov, Fmov, force_ascii=False)
 
-Sref, Fref = igl.read_triangle_mesh("test_data/F115_P16_Nissl_x20_mesh.sphere.ply")
-Smov, Fmov = igl.read_triangle_mesh("test_data/no-ob.remeshed.sphere.ply")
+mesh1_2 = mesh1.replace("ply", "sphere.ply")
+mesh2_2 = mesh2.replace("ply", "sphere.ply")
+Sref, Fref = igl.read_triangle_mesh(mesh2_2)
+Smov, Fmov = igl.read_triangle_mesh(mesh1_2)
 
 # orient Smov as Sref
 mm.preparation((Vref, Fref, Vmov, Fmov,
@@ -212,6 +221,10 @@ x = mm.matchmesh((Vref, Fref, Vmov, Fmov,
     Smov, Fmov))
 sph = mm.sphere(x)
 
-igl.write_triangle_mesh("test_data/result.mov.ply", Vmov, Fmov, force_ascii=False)
-igl.write_triangle_mesh("test_data/result.mov-morph.sphere.ply", sph, Fmov, force_ascii=False)
-igl.write_triangle_mesh("test_data/result.mov-morph.ply", mm.project(sph), Fmov, force_ascii=False)
+mesh3_1 = mesh3.replace("ply", "mov.ply")
+mesh3_2 = mesh3.replace("ply", "mov-morph.sphere.ply")
+mesh3_3 = mesh3.replace("ply", "mov-morph.ply")
+
+igl.write_triangle_mesh(mesh3_1, Vmov, Fmov, force_ascii=False)
+igl.write_triangle_mesh(mesh3_2, sph, Fmov, force_ascii=False)
+igl.write_triangle_mesh(mesh3_3, mm.project(sph), Fmov, force_ascii=False)
