@@ -7,6 +7,7 @@
 [submodule "bin/GraphiteThree"]
 	path = bin/GraphiteThree
 	url = https://github.com/BrunoLevy/GraphiteThree
+	ignore = dirty
 [submodule "bin/homogeneous"]
 	path = bin/homogeneous
 	url = https://github.com/r03ert0/homogeneous
